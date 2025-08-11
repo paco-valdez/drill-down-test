@@ -1,103 +1,197 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import cube from '@cubejs-client/core';
+
+const CUBE_API_URL = process.env.NEXT_PUBLIC_CUBE_API_URL;
+const API_TOKEN = process.env.NEXT_PUBLIC_CUBE_API_TOKEN;
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [results, setResults] = useState([]);
+  const [testingCube, setTestingCube] = useState(false);
+  const [testingView, setTestingView] = useState(false);
+  
+  const cubeApi = cube(API_TOKEN, { 
+    apiUrl: CUBE_API_URL 
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const addResult = (title, content, type = 'info') => {
+    const newResult = {
+      id: Date.now(),
+      title,
+      content,
+      type,
+      timestamp: new Date().toLocaleTimeString()
+    };
+    setResults(prev => [...prev, newResult]);
+  };
+
+  const clearResults = () => {
+    setResults([]);
+  };
+
+  const testDrillInCube = async () => {
+    setTestingCube(true);
+    
+    try {
+      addResult('🔍 Testing Drill Members in Cube: lineitem', 'Starting test...');
+
+      const initialQuery = {
+        measures: ['lineitem.count'],
+        dimensions: []
+      };
+
+      addResult('📊 Initial Query (Cube)', JSON.stringify(initialQuery, null, 2));
+      
+      const initialResult = await cubeApi.load(initialQuery);
+      addResult('📈 Initial Result (Cube)', JSON.stringify(initialResult.rawData(), null, 2), 'success');
+
+      const drillQuery = {
+        measures: ['lineitem.count'],
+        dimensions: ['lineitem.ship_mode', 'lineitem.line_status']
+      };
+
+      addResult('🔧 Drill Down Query (Cube)', JSON.stringify(drillQuery, null, 2));
+      
+      const drillResult = await cubeApi.load(drillQuery);
+      addResult('✅ Drill Down Result (Cube)', JSON.stringify(drillResult.rawData(), null, 2), 'success');
+
+    } catch (error) {
+      addResult('❌ Error in Cube Test', error.message, 'error');
+    } finally {
+      setTestingCube(false);
+    }
+  };
+
+  const testDrillInView = async () => {
+    setTestingView(true);
+    
+    try {
+      addResult('🔍 Testing Drill Members in View: item_information', 'Starting test...');
+
+      const initialQuery = {
+        measures: ['item_information.count'],
+        dimensions: []
+      };
+
+      addResult('📊 Initial Query (View)', JSON.stringify(initialQuery, null, 2));
+      
+      const initialResult = await cubeApi.load(initialQuery);
+      addResult('📈 Initial Result (View)', JSON.stringify(initialResult.rawData(), null, 2), 'success');
+
+      const drillQuery = {
+        measures: ['item_information.count'],
+        dimensions: ['item_information.ship_mode', 'item_information.line_status']
+      };
+
+      addResult('🔧 Drill Down Query (View)', JSON.stringify(drillQuery, null, 2));
+      
+      const drillResult = await cubeApi.load(drillQuery);
+      addResult('✅ Drill Down Result (View)', JSON.stringify(drillResult.rawData(), null, 2), 'success');
+
+    } catch (error) {
+      addResult('❌ Error in View Test', error.message, 'error');
+    } finally {
+      setTestingView(false);
+    }
+  };
+
+  const getResultTypeColor = (type) => {
+    switch (type) {
+      case 'error': return 'text-red-700';
+      case 'success': return 'text-green-700';
+      default: return 'text-blue-700';
+    }
+  };
+
+  return (
+    <div className="font-sans max-w-6xl mx-auto p-5 bg-white min-h-screen">
+      <h1 className="text-3xl font-bold text-black text-center mb-8">
+        Cube.js Drill Members Functionality Test
+      </h1>
+      
+      <div className="bg-gray-50 p-5 rounded-lg shadow-sm mb-5 border">
+        <h2 className="text-xl font-semibold text-black border-b-2 border-gray-300 pb-2 mb-4">
+          Test Configuration
+        </h2>
+        <div className="bg-white p-3 rounded mb-4 border text-black">
+          <div><strong>Cube:</strong> lineitem</div>
+          <div><strong>View:</strong> item_information</div>
+          <div><strong>Drill Members:</strong> ship_mode, line_status</div>
+          <div><strong>Measure:</strong> count (with drill members configured)</div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={testDrillInCube}
+            disabled={testingCube}
+            className={`px-5 py-2 rounded text-white font-medium transition-colors ${
+              testingCube 
+                ? 'bg-yellow-500 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {testingCube ? 'Testing...' : 'Test Drill in Cube (lineitem)'}
+          </button>
+          
+          <button
+            onClick={testDrillInView}
+            disabled={testingView}
+            className={`px-5 py-2 rounded text-white font-medium transition-colors ${
+              testingView 
+                ? 'bg-yellow-500 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {testingView ? 'Testing...' : 'Test Drill in View (item_information)'}
+          </button>
+          
+          <button
+            onClick={clearResults}
+            className="px-5 py-2 rounded bg-gray-600 text-white font-medium hover:bg-gray-700 transition-colors"
+          >
+            Clear Results
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 p-5 rounded-lg shadow-sm border">
+        <h2 className="text-xl font-semibold text-black border-b-2 border-gray-300 pb-2 mb-4">
+          Results
+        </h2>
+        
+        {results.length === 0 ? (
+          <div className="bg-blue-50 p-4 rounded border">
+            <h3 className="text-black font-semibold mb-2">ℹ️ Instructions</h3>
+            <pre className="text-sm text-black whitespace-pre-wrap">
+              {`Click the buttons above to test drill members functionality.
+
+1. "Test Drill in Cube" - Tests drill members on the lineitem cube
+2. "Test Drill in View" - Tests drill members on the item_information view
+
+Both tests will:
+- First run a basic query with just the count measure
+- Then run a drill-down query including ship_mode and line_status dimensions
+
+This will help verify that drill members work in both cubes and views.`}
+            </pre>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {results.map((result) => (
+              <div key={result.id} className="border-l-4 border-blue-500 pl-4">
+                <h3 className={`font-semibold ${getResultTypeColor(result.type)} mb-1`}>
+                  {result.title}
+                  <span className="text-xs text-gray-500 ml-2">({result.timestamp})</span>
+                </h3>
+                <pre className="bg-white p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap border text-black">
+                  {result.content}
+                </pre>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
