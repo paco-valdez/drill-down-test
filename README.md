@@ -52,8 +52,9 @@ The application provides two test buttons:
 1. **"Test Drill in Cube (lineitem)"** - Validates drill functionality on traditional cubes
 2. **"Test Drill in View (item_information)"** - **This is the key test** that proves views support drill down
 
-<img width="676" height="1064" alt="Screenshot 2025-08-11 at 3 10 59 PM" src="https://github.com/user-attachments/assets/0a3d0330-747a-4c38-a49e-eb2711620b6e" />
-<img width="727" height="1061" alt="Screenshot 2025-08-11 at 3 11 08 PM" src="https://github.com/user-attachments/assets/2169ed47-aff8-417b-95b9-405b34f2a8aa" />
+<img width="1174" height="1018" alt="Screenshot 2025-08-11 at 3 26 28 PM" src="https://github.com/user-attachments/assets/61f3c75d-a4cc-4512-81bc-4194fb8dad56" />
+
+<img width="1146" height="1075" alt="Screenshot 2025-08-11 at 3 26 45 PM" src="https://github.com/user-attachments/assets/80d123a8-3649-49a7-953a-64bda89cecf4" />
 
 
 Each test performs:
