@@ -1,20 +1,20 @@
 # Cube.js Drill Down Functionality Test
 
-This is a Proof of Concept (PoC) project designed to test and demonstrate drill down functionality for **Views** using the Cube.js client SDK. The main purpose is to verify that drill members work correctly in Cube.js Views, not just in regular Cubes.
+This is a Proof of Concept (PoC) project designed to test and demonstrate the **resultSet.drillDown()** functionality for **Views** using the Cube.js client SDK. The main purpose is to verify that the `resultSet.drillDown()` method works correctly with Cube.js Views, not just in regular Cubes.
 
 ## What This PoC Proves
 
-This application demonstrates that **drill down functionality works in Cube.js Views**, which is a critical feature for data analysis workflows. The PoC specifically tests:
+This application demonstrates that **the `resultSet.drillDown()` method works with Cube.js Views**, which is a critical feature for interactive data analysis workflows. The PoC specifically tests:
 
-1. **Cube Drill Down** - Testing drill members (`ship_mode`, `line_status`) on the `lineitem` cube
-2. **View Drill Down** - Testing drill members (`ship_mode`, `line_status`) on the `item_information` view
+1. **Cube DrillDown** - Testing `resultSet.drillDown()` on the `lineitem` cube
+2. **View DrillDown** - Testing `resultSet.drillDown()` on the `item_information` view
 
 ### Key Proof Point
 
 The **important validation** happens when you click "Test Drill in View (item_information)" - this proves that:
-- Views can have drill members configured just like cubes
-- The Cube.js client can successfully execute drill down queries on views
-- The `item_information` view properly exposes drill members for interactive analysis
+- Views support the `resultSet.drillDown()` method just like cubes
+- The method correctly generates drill-down queries for view-based result sets
+- Interactive drill-down functionality works seamlessly with views
 
 ## Environment Setup
 
@@ -57,9 +57,10 @@ The application provides two test buttons:
 
 
 Each test performs:
-- An initial query with just the count measure
-- A drill down query adding the configured drill members (`ship_mode`, `line_status`)
-- Real-time display of query results and API responses
+- An initial query with count measure and ship_mode dimension
+- Selects the first data point from the results
+- Uses `resultSet.drillDown()` to drill into that specific data point
+- Real-time display of the drill-down process and API responses
 
 ## Technical Implementation
 

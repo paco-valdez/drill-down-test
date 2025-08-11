@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Proof of Concept (PoC) project to test drill down functionality for Views using the Cube.js client SDK. The main application has been fully converted from the HTML prototype into a React/Next.js application that demonstrates drill down capabilities in both Cube.js cubes and views.
+This is a Proof of Concept (PoC) project to test the **resultSet.drillDown()** functionality for Views using the Cube.js client SDK. The main application has been fully converted from the HTML prototype into a React/Next.js application that demonstrates the `resultSet.drillDown()` method works with both Cube.js cubes and views.
 
 ## Common Development Commands
 
@@ -50,9 +50,15 @@ The main page (`src/app/page.js`) is a fully functional React application that:
 
 #### Cube.js Integration
 - Uses official `@cubejs-client/core` package
-- Tests drill members (`ship_mode`, `line_status`) on both cubes and views
+- Tests `resultSet.drillDown()` method on both cubes and views
 - Displays raw API responses using `result.rawData()`
-- Demonstrates that Views support drill down functionality (key proof point)
+- Demonstrates that Views support the `resultSet.drillDown()` method (key proof point)
+
+#### DrillDown Testing Process
+- Gets initial aggregated data with count measure and ship_mode dimension
+- Selects first data point from results
+- Calls `resultSet.drillDown({ 'dimension': value }, pivotConfig)`
+- Loads and displays the drill-down query results
 
 #### UI/UX
 - Tailwind CSS styling with high contrast (black text on white/gray backgrounds)
@@ -61,14 +67,15 @@ The main page (`src/app/page.js`) is a fully functional React application that:
 - Pre-formatted JSON display of queries and results
 
 ### Key Features Being Tested
-- **Primary Goal**: Proving that drill down functionality works in Cube.js Views
-- Drill members configuration: `ship_mode` and `line_status` dimensions
-- Count measure with drill capabilities
-- Comparison between cube and view drill down behavior
+- **Primary Goal**: Proving that `resultSet.drillDown()` method works in Cube.js Views
+- DrillDown method testing: Using `resultSet.drillDown(xValues, pivotConfig)`
+- Count measure with ship_mode dimension for drilling
+- Comparison between cube and view drillDown behavior
 - Official Cube.js client SDK integration
 
 ### Development Notes
 - The application requires valid Cube.js credentials in `.env.local`
 - Restart dev server after environment variable changes
-- Main validation occurs when testing drill down on the `item_information` view
-- Results show both the query structure and API response data
+- Main validation occurs when testing `resultSet.drillDown()` on the `item_information` view
+- Results show the drillDown method call and resulting query structure
+- The test proves that views expose drill members and support interactive drilling

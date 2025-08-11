@@ -34,11 +34,12 @@ export default function Home() {
     setTestingCube(true);
     
     try {
-      addResult('🔍 Testing Drill Members in Cube: lineitem', 'Starting test...');
+      addResult('🔍 Testing Drill Down in Cube: lineitem', 'Starting test with resultSet.drillDown()...');
 
+      // Step 1: Get initial aggregated data
       const initialQuery = {
         measures: ['lineitem.count'],
-        dimensions: []
+        dimensions: ['lineitem.ship_mode']
       };
 
       addResult('📊 Initial Query (Cube)', JSON.stringify(initialQuery, null, 2));
@@ -46,15 +47,34 @@ export default function Home() {
       const initialResult = await cubeApi.load(initialQuery);
       addResult('📈 Initial Result (Cube)', JSON.stringify(initialResult.rawData(), null, 2), 'success');
 
-      const drillQuery = {
-        measures: ['lineitem.count'],
-        dimensions: ['lineitem.ship_mode', 'lineitem.line_status']
-      };
+      // Step 2: Get the first data point to drill down on
+      const data = initialResult.rawData();
+      if (data.length === 0) {
+        addResult('⚠️ No data to drill down on', 'Initial query returned no results', 'error');
+        return;
+      }
 
-      addResult('🔧 Drill Down Query (Cube)', JSON.stringify(drillQuery, null, 2));
+      const firstRow = data[0];
+      const shipModeValue = firstRow['lineitem.ship_mode'];
       
-      const drillResult = await cubeApi.load(drillQuery);
-      addResult('✅ Drill Down Result (Cube)', JSON.stringify(drillResult.rawData(), null, 2), 'success');
+      addResult('🎯 Drilling down on ship_mode', `Selected value: "${shipModeValue}"`, 'info');
+
+      // Step 3: Use resultSet.drillDown() method
+      const drillDownResult = initialResult.drillDown(
+        {
+          'lineitem.ship_mode': shipModeValue
+        },
+        // Add drill members
+        {}
+      );
+
+      addResult('🔧 DrillDown Method Call', 
+        `resultSet.drillDown({\n  'lineitem.ship_mode': '${shipModeValue}'\n}, {})`, 
+        'info'
+      );
+
+      const drillDownData = await cubeApi.load(drillDownResult);
+      addResult('✅ Drill Down Result (Cube)', JSON.stringify(drillDownData.rawData(), null, 2), 'success');
 
     } catch (error) {
       addResult('❌ Error in Cube Test', error.message, 'error');
@@ -67,11 +87,12 @@ export default function Home() {
     setTestingView(true);
     
     try {
-      addResult('🔍 Testing Drill Members in View: item_information', 'Starting test...');
+      addResult('🔍 Testing Drill Down in View: item_information', 'Starting test with resultSet.drillDown()...');
 
+      // Step 1: Get initial aggregated data from view
       const initialQuery = {
         measures: ['item_information.count'],
-        dimensions: []
+        dimensions: ['item_information.ship_mode']
       };
 
       addResult('📊 Initial Query (View)', JSON.stringify(initialQuery, null, 2));
@@ -79,15 +100,34 @@ export default function Home() {
       const initialResult = await cubeApi.load(initialQuery);
       addResult('📈 Initial Result (View)', JSON.stringify(initialResult.rawData(), null, 2), 'success');
 
-      const drillQuery = {
-        measures: ['item_information.count'],
-        dimensions: ['item_information.ship_mode', 'item_information.line_status']
-      };
+      // Step 2: Get the first data point to drill down on
+      const data = initialResult.rawData();
+      if (data.length === 0) {
+        addResult('⚠️ No data to drill down on', 'Initial query returned no results', 'error');
+        return;
+      }
 
-      addResult('🔧 Drill Down Query (View)', JSON.stringify(drillQuery, null, 2));
+      const firstRow = data[0];
+      const shipModeValue = firstRow['item_information.ship_mode'];
       
-      const drillResult = await cubeApi.load(drillQuery);
-      addResult('✅ Drill Down Result (View)', JSON.stringify(drillResult.rawData(), null, 2), 'success');
+      addResult('🎯 Drilling down on ship_mode (View)', `Selected value: "${shipModeValue}"`, 'info');
+
+      // Step 3: Use resultSet.drillDown() method on VIEW
+      const drillDownResult = initialResult.drillDown(
+        {
+          'item_information.ship_mode': shipModeValue
+        },
+        // Add drill members from view
+        {}
+      );
+
+      addResult('🔧 DrillDown Method Call (View)', 
+        `resultSet.drillDown({\n  'item_information.ship_mode': '${shipModeValue}'\n}, {})`, 
+        'info'
+      );
+
+      const drillDownData = await cubeApi.load(drillDownResult);
+      addResult('✅ Drill Down Result (View)', JSON.stringify(drillDownData.rawData(), null, 2), 'success');
 
     } catch (error) {
       addResult('❌ Error in View Test', error.message, 'error');
